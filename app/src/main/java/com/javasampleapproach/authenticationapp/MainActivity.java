@@ -3,11 +3,15 @@ package com.javasampleapproach.authenticationapp;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
+import androidx.biometric.BiometricPrompt;
+import androidx.core.content.ContextCompat;
+
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -20,6 +24,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 
 import java.util.List;
+import java.util.concurrent.Executor;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -28,13 +33,18 @@ public class MainActivity extends AppCompatActivity {
     Button btnCreateNew;
     Button btnSignIn;
 
+    //Biometric variables
+    private TextView authStatusTv;
+    private Button authBtn;
+    private Executor executor;
+    private BiometricPrompt biometricPrompt;
+    private BiometricPrompt.PromptInfo promptInfo;
 
 
     String enterUsername, enterPassword;
-    UserDetails details;
+
 
     private FirebaseAuth myAuth;
-
 
 
     FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -64,8 +74,52 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+        //---------------------------------Bio metric section------------------------------------------------
+        authStatusTv = findViewById(R.id.authStatus);
+        authBtn = findViewById(R.id.bioBtn);
 
+        //init bio metric
+        executor = ContextCompat.getMainExecutor(this);
+        biometricPrompt = new BiometricPrompt(MainActivity.this, executor, new BiometricPrompt.AuthenticationCallback() {
+            @Override
+            public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
+                super.onAuthenticationError(errorCode, errString);
 
+                //Error authentication, stop tasks which would require auth
+                authStatusTv.setText("Authentication error" + errString);
+                Toast.makeText(MainActivity.this, "Authentication error:"+errString, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+                super.onAuthenticationSucceeded(result);
+                //Successful authentication
+                authStatusTv.setText("Authentication succeeded...!");
+                Toast.makeText(MainActivity.this, "Authentication succeeded...!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onAuthenticationFailed() {
+                super.onAuthenticationFailed();
+                //Failed authentication
+                authStatusTv.setText("Authentication failed..!");
+                Toast.makeText(MainActivity.this, "Authentication failed..!", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        //Set up title, desciption on the auth dialog pop up
+        promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                .setTitle("Biometric Authentication")
+                .setSubtitle("Login using finger print authentication")
+                .setNegativeButtonText("User App Password")
+                .build();
+
+        authBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+            biometricPrompt.authenticate(promptInfo);
+            }
+        });
 
         myAuth = FirebaseAuth.getInstance();
 
