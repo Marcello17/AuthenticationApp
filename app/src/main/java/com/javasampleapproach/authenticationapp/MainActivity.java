@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        //---------------------------------Bio metric section------------------------------------------------
+        //---------------------------------Bio metric section-----------------------------------------------------------------------------//
         authStatusTv = findViewById(R.id.authStatus);
         authBtn = findViewById(R.id.bioBtn);
 
@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
             biometricPrompt.authenticate(promptInfo);
             }
         });
-
+//------------------------------------------------End of biometric code----------------------------------------------------------------------//
         myAuth = FirebaseAuth.getInstance();
 
 
@@ -163,3 +163,9 @@ public class MainActivity extends AppCompatActivity {
 
 
 }
+
+/*Sources used:
+https://stackoverflow.com/questions/35335892/android-m-fingerprint-scanner-on-android-emulator/45181265
+
+https://www.youtube.com/watch?v=yPcxZWSszh8
+ */
